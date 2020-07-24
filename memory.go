@@ -8,15 +8,15 @@ import (
 
 // MemoryCache 是一个基于内存的缓存，一般来说缓存的数据时效要短一些
 type MemoryCache struct {
-	expire time.Duration
-	cache  *cache.Cache
+	cache             *cache.Cache
+	defaultExpiration time.Duration
 }
 
 // NewMemoryCache 用于新建一个内存缓存
 func NewMemoryCache(defaultExpiration, cleanupInterval time.Duration) *MemoryCache {
 	return &MemoryCache{
-		expire: defaultExpiration,
-		cache:  cache.New(defaultExpiration, cleanupInterval),
+		defaultExpiration: defaultExpiration,
+		cache:             cache.New(defaultExpiration, cleanupInterval),
 	}
 }
 
@@ -34,7 +34,7 @@ func (mc *MemoryCache) Get(key string, value interface{}) error {
 
 // Set 设置key值对应的缓存
 func (mc *MemoryCache) Set(key string, value interface{}, ttl ...time.Duration) error {
-	expire := mc.expire
+	expire := mc.defaultExpiration
 	if len(ttl) > 0 {
 		expire = ttl[0]
 	}
