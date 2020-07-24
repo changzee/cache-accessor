@@ -72,13 +72,18 @@ func (accessor *CacheAccessor) LazyGet(key string, res interface{}, slower func(
 
 	// 重复抑制
 	group := accessor.group
-	slowerRet, err, _ := group.Do(key, slower)
-	if err == nil {
-		reflect.ValueOf(res).Elem().Set(reflect.ValueOf(slowerRet))
-		err = accessor.Set(key, slowerRet)
-		if err != nil {
-			return err
+	ret, err, _ := group.Do(key, func() (interface{}, error) {
+		ret, err := slower()
+		if err == nil {
+			err = accessor.Set(key, ret)
 		}
+		return ret, err
+	})
+
+	// 设置返回值
+	if err == nil {
+		// just let it panic if fails
+		reflect.ValueOf(res).Elem().Set(reflect.ValueOf(ret))
 	}
 	return err
 }
