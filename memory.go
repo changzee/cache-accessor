@@ -1,7 +1,6 @@
 package cache
 
 import (
-	"errors"
 	"github.com/patrickmn/go-cache"
 	"reflect"
 	"time"
@@ -28,12 +27,9 @@ func (mc *MemoryCache) Get(key string, value interface{}) error {
 		return ErrNotExist
 	}
 
-	if reflect.TypeOf(value).Elem().Kind() == reflect.TypeOf(cacheValue).Kind() {
-		reflect.ValueOf(value).Elem().Set(reflect.ValueOf(cacheValue))
-		return nil
-	} else {
-		return errors.New("error type assigned")
-	}
+	// just let it panic if fail
+	reflect.ValueOf(value).Elem().Set(reflect.ValueOf(cacheValue))
+	return nil
 }
 
 // Set 设置key值对应的缓存
